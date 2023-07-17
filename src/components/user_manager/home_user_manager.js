@@ -85,13 +85,14 @@ export default class UserManager extends Component {
 
     //기간설정리스너
     onDateListener = (date) => {
-        console.log('date', date)
+        console.log('기간', date)
         this.setState({ date: date })
         this.setState({ userContents: this.dataFiltering(date, this.state.searchText, this.state.approve, this.state.sale) })
     }
     onDateRangeListener = (dates) => {
         this.setState({ date: dates })
         this.setState({ userContents: this.dataFiltering(dates, this.state.searchText, this.state.approve, this.state.sale) });
+        
     }
     //검색리스너
     searchTextListener = (text) => {
@@ -111,17 +112,20 @@ export default class UserManager extends Component {
 
     //기간설정에 따른 데이터필터링
     dataFiltering(date, text, approve, sale) {
-        console.log('date: ', date)
+      /*   console.log('date: ', date)
         console.log('text: ', text)
         console.log('approve: ', approve)
-        console.log('sale: ', sale)
+        console.log('sale: ', sale) */
         let filteredContents = this.contents;
 
         filteredContents = filteredContents.filter((item) => {
+            
             if (date === 1)
-                return Constant.isSameDate(new Date(item.registerDate))
-            else if (date === 2)
                 return Constant.isSameMonth(new Date(item.registerDate))
+            else if (date === 2)
+                return Constant.isThreeMonth(new Date(item.registerDate))
+            else if(date===3)
+                return Constant.isSixMonth(new Date(item.registerDate))
             else if (date.length === 2)
                 return new Date(item.registerDate) >= date[0] && new Date(item.registerDate) <= date[1]
             else
@@ -150,7 +154,7 @@ export default class UserManager extends Component {
         })
 
         return filteredContents
-
+        
     }
     render() {
         console.log('approval', this.state.approval)

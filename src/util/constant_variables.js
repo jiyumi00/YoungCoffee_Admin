@@ -19,15 +19,24 @@ export default class Constant{
         return `${year}-${month >= 10 ? month : '0' + month}-${day >= 10 ? day : '0' + day}`
     }
     
-    static isSameDate=(date)=>{
+   /*  static isSameDate=(date)=>{
         let today=new Date()
         return date.getFullYear()===today.getFullYear()
         && date.getMonth()===today.getMonth()
         &&date.getDate()===today.getDate();
-    }
+    } */
     static isSameMonth=(date)=>{
         let today=new Date()
         return date.getMonth()===today.getMonth()
+    }
+    static isThreeMonth=(date)=>{
+        let today=new Date()
+        return date.getMonth()>=today.getMonth()-2 && date.getMonth()<=today.getMonth()
+       
+    }
+    static isSixMonth=(date)=>{
+        let today=new Date()
+        return date.getMonth()>=today.getMonth()-5 && date.getMonth()<=today.getMonth()
     }
     //user_manager approval dropdownbox
     static getApproval(){

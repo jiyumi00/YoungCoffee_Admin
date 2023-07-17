@@ -25,7 +25,21 @@ export default class TaxManager extends Component {
         this.itemCountPerPage = 17; //한페이지당 보여질 리스트 갯수
         this.pageCountPerPage = 5;
 
-        this.contents = []; //서버에서 가져온 원본 contents
+        this.contents = [{
+            companyName: '길동정비',
+            companyNo: '0000000000',
+            companyTel: '01012341234',
+            companyAddress: '인제대학교 장영실관',
+            validate: 0,
+        },
+        {
+            companyName: '홍길정비',
+            companyNo: '1234567890',
+            companyTel: '01043214321',
+            companyAddress: '인제대학교 장영실관',
+            validate: 1,
+        },
+        ]; //서버에서 가져온 원본 contents
 
 
         this.state = {
@@ -46,25 +60,12 @@ export default class TaxManager extends Component {
             offset: 0,            //현재페이지에서 시작할 item index
 
 
-        }
+        };
     }
 
     componentDidMount() {
-        this.setState({
-            taxContents: [{
-                companyName: '길동정비',
-                companyNo: '0000000000',
-                companyTel: '01012341234',
-                companyAddress: '인제대학교 장영실관'
-            },
-            {
-                companyName: '홍길정비',
-                companyNo: '1234567890',
-                companyTel: '01043214321',
-                companyAddress: '인제대학교 장영실관'
-            },
-            ]
-        })
+
+        this.setState({ taxContents: this.contents })
         // this.callGetUsersAPI().then((response) => {
         //     console.log('user', response)
         //     this.contents = response;
@@ -100,23 +101,23 @@ export default class TaxManager extends Component {
     onDateListener = (date) => {
         console.log('date', date)
         this.setState({ date: date })
-        this.setState({ taxContents: this.dataFiltering(date, this.state.searchText, this.state.approve, this.state.sale) })
+        this.setState({ taxContents: this.dataFiltering(date, this.state.searchText, this.state.approve) })
     }
     onDateRangeListener = (dates) => {
         this.setState({ date: dates })
-        this.setState({ taxContents: this.dataFiltering(dates, this.state.searchText, this.state.approve, this.state.sale) });
+        this.setState({ taxContents: this.dataFiltering(dates, this.state.searchText, this.state.approve) });
     }
     //검색리스너
     searchTextListener = (text) => {
         this.setState({ searchText: text })
-        this.setState({ taxContents: this.dataFiltering(this.state.date, text, this.state.approve, this.state.sale) })
+        this.setState({ taxContents: this.dataFiltering(this.state.date, text, this.state.approve) })
     }
 
     //정산여부리스너
     selectApproveListener = (value) => {
         console.log(this.approval)
         this.setState({ approve: value })
-        this.setState({ taxContents: this.dataFiltering(this.state.date, this.state.searchText, value, this.state.sale) })
+        this.setState({ taxContents: this.dataFiltering(this.state.date, this.state.searchText, value) })
     }
 
     //기간설정에 따른 데이터필터링
@@ -129,9 +130,11 @@ export default class TaxManager extends Component {
 
         filteredContents = filteredContents.filter((item) => {
             if (date === 1)
-                return Constant.isSameDate(new Date(item.registerDate))
-            else if (date === 2)
                 return Constant.isSameMonth(new Date(item.registerDate))
+            else if (date === 2)
+                return Constant.isThreeMonth(new Date(item.registerDate))
+            else if (date === 3)
+                return Constant.isSixMonth(new Date(item.registerDate))
             else if (date.length === 2)
                 return new Date(item.registerDate) >= date[0] && new Date(item.registerDate) <= date[1]
             else
@@ -166,7 +169,7 @@ export default class TaxManager extends Component {
         console.log('approval', this.state.approve)
         console.log('sale', this.state.sale)
         return (
-            <div style={{height:'90vh'}}>
+            <div style={{ height: '90vh' }}>
                 <Container>
                     {/* 서브탑메뉴바 영역 */}
                     <nav className="topmenubar w-100">
