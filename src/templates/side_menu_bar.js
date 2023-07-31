@@ -13,15 +13,16 @@ export default class SideMenuBar extends Component {
         }
     }
 
+    
     render() {
         return (
 
             <div className="menu-bar mainColor">
                 {
-                    this.state.selectList.map((m, i) =>
-                        <div className='sidemenu' key={i}>
-                            <NavLink to={m.href} className={({ isActive }) => isActive ? "sidemenu-active" : "sidemenu-inactive"} >
-                                {m.icon} {m.name}
+                    this.state.selectList.map((item, index) =>
+                        <div className='sidemenu' key={item.key}>
+                            <NavLink to={item.href} className={({ isActive }) => isActive ? "sidemenu-active" : "sidemenu-inactive"}>
+                                {item.icon} {item.name}
                             </NavLink>
                         </div>
                     )

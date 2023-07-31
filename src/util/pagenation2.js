@@ -18,10 +18,14 @@ class Pagenation2 extends Component {
         for (let i = 0; i <= this.maxPage; i++)
             this.pages.push(i);
 
+       
+        console.log('pages = ', this.pages);
+
+    }
+
+    componentDidMount() {
         if (this.maxPage < this.props.pageCountPerPage)
             this.setState({ endPage: this.maxPage });
-
-        console.log('pages = ', this.pages);
 
     }
 

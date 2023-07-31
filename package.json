@@ -1,5 +1,5 @@
 {
-  "homepage": "/admin",
+
   "name": "ycoffee-admin",
   "version": "0.1.0",
   "private": true,
@@ -25,11 +25,12 @@
     "react-icons": "^4.8.0",
     "react-router-dom": "^6.11.1",
     "react-scripts": "5.0.1",
+    "redux": "^4.2.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "set \"GENERATE_SOURCEMAP=false\" && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

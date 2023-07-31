@@ -16,7 +16,7 @@ export default class TopTemplate extends Component {
           <Navbar.Brand href='/' style={{ marginLeft: '15px'}}>
             <img style={{width:150}} src={LongLogo}/></Navbar.Brand>
           <Nav className="ms-auto">
-            <Link to="/" className="logout">LOGOUT</Link>
+            <Link to="/" style={{ marginRight: '15px',color: '#BF0757' }}>LOGOUT</Link>
           </Nav>
         </Navbar>
       </div>

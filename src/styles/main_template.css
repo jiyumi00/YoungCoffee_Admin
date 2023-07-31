@@ -119,9 +119,7 @@ a.fc-col-header-cell-cushion {
 }
 
 .search {
-    margin-left: 15px;
     width: 30%;
-
 }
 
 .topmenubar {
@@ -157,7 +155,6 @@ a.fc-col-header-cell-cushion {
 @media screen and (max-width : 998px) {
     .search {
         width: 100%;
-        margin-left: 0px;
     }
 
     .datepicker {
