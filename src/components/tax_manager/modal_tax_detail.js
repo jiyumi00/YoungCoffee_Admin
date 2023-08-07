@@ -1,55 +1,66 @@
 import React, { Component } from "react";
-import { Button, Modal, CloseButton } from "react-bootstrap";
+import { Button, Modal, CloseButton,Table, } from "react-bootstrap";
 
-import WebServiceManager from "../../util/webservice_manager";
 import Constant from "../../util/constant_variables";
+import WebServiceManager from "../../util/webservice_manager";
 
 
-//UserInfo 상세보기 모달 클래스
+//taxinfo 상세보기 모달 클래스
 export default class ModalTaxDetail extends Component {
     constructor(props) {
         super(props);
-        this.id = this.props.item.id
+        //this.id = this.props.item.id
         this.state = {
             // companyNoImageURI: '', //companyNoImageURI:사업자등록증 사진
             // cardImageURI: '' //cardImageURI:명함 사진
         }
     }
-    approveButtonClicked = () => {
-        alert('수정되었습니다.')
-    }
-    deleteButtonClicked = () => {
-        alert('삭제되었습니다.')
-    }
-    componentDidMount() {
-        // this.callGetCompanyImageAPI().then((response) => {
-        //     this.setState({ companyNoImageURI: URL.createObjectURL(response) })
-        // })
-        // this.callGetcardImageAPI().then((response) => {
-        //     this.setState({ cardImageURI: URL.createObjectURL(response) })
-        // })
+
+    downloadExcelButtonClicked = () => {
+        if (window.confirm("다운로드하시겠습니까?")) {
+            if (this.props.item.complete == 1) {
+                const element = document.createElement('a');
+                const url = Constant.serviceURL + "/admin/GetSettledExcel?user_id=" + this.props.item.userID + "&day=" + this.props.item.belongDate;
+                //console.log('excel down url = ', url);
+                element.href = url;
+                document.body.appendChild(element);
+                element.click();
+                this.props.closeButtonListener();
+            }
+        }
     }
 
 
-    // //사업자등록증 사진을 가져오는 API
-    // async callGetCompanyImageAPI() {
-    //     let manager = new WebServiceManager(Constant.serviceURL + "/GetCompanyImage", "post");
-    //     manager.addFormData("data", { userID: 28, passwd: "9999", id: this.id });//열람하고자 하는 id
-    //     let response = await manager.start();
-    //     if (response.ok) {
-    //         return response.blob();
-    //     }
-    // }
+    cancelCompleteButtonClicked=()=> {
+        if(window.confirm(this.props.item.cmpName+"의 "+this.props.item.belongDate+"월분 \n정산을 보류 하시겠습니까?")) {
+            this.callSetCancelCompleteAPI().then((response)=> {
+                if(response.success>0) {
+                    alert(this.props.item.cmpName+"의 "+this.props.item.belongDate+"월분 \n정산이 보류되었습니다");
+                    this.props.onRefresh();
+                }
+                else
+                    alert(this.props.item.cmpName+"의 "+this.props.item.belongDate+"월분 \n정산보류에 실패하였습니다");
+                this.props.closeButtonListener();
+            });
+        }
+    }
 
-    // //명함 사진을 가져오는 API
-    // async callGetcardImageAPI() {
-    //     let manager = new WebServiceManager(Constant.serviceURL + "/GetNamecardImage", "post");
-    //     manager.addFormData("data", { userID: 28, passwd: "9999", id: this.id });//열람하고자 하는 id
-    //     let response = await manager.start();
-    //     if (response.ok) {
-    //         return response.blob();
-    //     }
-    // }
+    async callSetCancelCompleteAPI() {
+        const login = { "userID": parseInt(sessionStorage.getItem("userID")), "passwd":sessionStorage.getItem("passwd") }
+        const data = {
+            userID: this.props.item.userID,
+            day: this.props.item.belongDate
+        };
+
+        let manager = new WebServiceManager(Constant.serviceURL + "/admin/SetCancelComplete", "post");
+        manager.addFormData("login", login); //마감취소할 권한이 있는지 확인
+        manager.addFormData("data", data); //넣을 데이터
+
+        let response = await manager.start();
+        if (response.ok)
+            return response.json();
+    }
+
 
     render() {
         const item = this.props.item;
@@ -61,48 +72,44 @@ export default class ModalTaxDetail extends Component {
                     centered>
                     <Modal.Header>
                         <Modal.Title>상세보기</Modal.Title>
-                        <CloseButton onClick={this.props.hideButtonClicked} />
+                        <CloseButton onClick={this.props.closeButtonListener} />
                     </Modal.Header>
 
                     <Modal.Body>
-                        <div className="fleft"  >
-                        <table className="w-100 background">
-                            <tbody>
-                                <tr>
-                                    <th><p>이름</p></th>
-                                    <td><p>{item.username}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>사업자번호</p></th>
-                                    <td><p>{item.companyNo}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>전화번호</p></th>
-                                    <td><p>{item.phone}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>주소</p></th>
-                                    <td><p>{item.address}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>정산여부</p></th>
-                                    <td><p>{item.validate}</p></td>
-                                </tr>
-                            </tbody>
-
-                        </table>
+                        <div>
+                            <Table bordered className="w-100">
+                                <tbody>
+                                    <tr>
+                                        <th>년-월</th>
+                                        <td>{item.belongDate}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>가맹점 명</th>
+                                        <td>{item.cmpName}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>전화번호</th>
+                                        <td>{item.cmpTel}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>주소</th>
+                                        <td>{item.cmpAddress}</td>
+                                    </tr>
+                                    <tr>
+                                        <th >마감여부</th>
+                                        {item.complete === 1 ? (<td>O</td>) : (<td>X</td>)}
+                                    </tr>
+                                    <tr>
+                                    </tr>
+                                </tbody>
+                            </Table>
                         </div>
-
-                       
                     </Modal.Body>
                     <Modal.Footer>
-                        {item.validate === 1 && <Button variant="primary" onClick={() => { this.approveButtonClicked() }}>승인</Button>}
-                        <Button variant="primary" onClick={() => { this.approveButtonClicked() }}>수정</Button>
-                        <Button variant="danger" onClick={() => { this.deleteButtonClicked() }}>삭제</Button>
+                        {item.complete === 1 && <Button className="downloadButton" onClick={this.cancelCompleteButtonClicked}>정산보류</Button>}
+                        {item.complete === 1 && <Button className="downloadButton" onClick={this.downloadExcelButtonClicked}>다운로드</Button>}
                     </Modal.Footer>
                 </Modal.Dialog>
-
-
             </div>
         )
     }

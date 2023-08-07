@@ -29,7 +29,7 @@ export default class PageHeader extends Component {
                         <Form.Control
                             onChange={(e) => {this.props.searchTextListener(e.target.value) }}
                             type="search"
-                            placeholder="상호로 검색해주세요"
+                            placeholder="가맹점 명으로 검색해주세요."
                             aria-label="Search"
                             className="searchinput"
                         />

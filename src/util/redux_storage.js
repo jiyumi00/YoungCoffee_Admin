@@ -1,6 +1,6 @@
 import {legacy_createStore as createStore} from "redux";
 
-const loginState={userID:parseInt(sessionStorage['userID']),passwd:sessionStorage['passwd']};
+const loginState={userID:0,passwd:"",visitLogin:false};
 
 function reducer (state=loginState, action)  {
     //console.log('리덕스에서의 값들 = ',action.data);
@@ -8,16 +8,17 @@ function reducer (state=loginState, action)  {
         case "Login":
             sessionStorage.setItem('userID',action.data.userID);
             sessionStorage.setItem('passwd',action.data.passwd);
-            sessionStorage.setItem('path','/UserInfo');
-            //state.userID=action.data.userID;
-            //state.passwd=action.data.passwd;
-            //console.log('리덕스에서 변화된 값 = ',state);
-            return state,{userID:action.data.userID,passwd:action.data.passwd};
+            return {...state,userID:action.data.userID,passwd:action.data.passwd,visitLogin:false};
+        case "Visit":
+            sessionStorage.setItem("userID",0);
+            sessionStorage.setItem("passwd","");
+            return {...state,userID:state.userID,passwd:state.passwd,visitLogin:true};
+        case "Exit":
+            return {...state,visitLogin:false};
         case "Logout" :
             sessionStorage.setItem('userID',0);
             sessionStorage.setItem('passwd','');
-            sessionStorage.setItem('path','/');
-            return {...state, userID:0, passwd:''};
+            return {...state, userID:0, passwd:'',visitLogin:true};
         default:
             return {...state, state};
     }

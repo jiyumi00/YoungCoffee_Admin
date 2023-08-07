@@ -5,6 +5,9 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import DownloadIcon from '@mui/icons-material/Download';
+
+import MyStorage from '../../util/redux_storage';
 
 import WebServiceManager from "../../util/webservice_manager";
 import Constant from "../../util/constant_variables";
@@ -18,48 +21,43 @@ export default class TaxManager extends Component {
     constructor(props) {
         super(props);
 
+        this.settleKind = Constant.getSettleKind();
 
-        this.approval = Constant.getTaxApproval();
-        this.sales = Constant.getSales();
-
-        this.itemCountPerPage = 17; //한페이지당 보여질 리스트 갯수
-        this.pageCountPerPage = 5;
+        this.itemCountPerPage = 13; //한페이지당 보여질 리스트 갯수
+        this.pageCountPerPage = 5;  //페이지는 5페이지로 제한
 
         this.contents = []; //서버에서 가져온 원본 contents
 
-
         this.state = {
-            modalVisible: false, //상품 모달
+            modalVisible: false, //상세보기
 
-            taxContents: [], //정산정보데이터
-            item: [],
-            selectedItemIndex: null,
+            taxContents: [], //가맹점 리스트 
+            item: {},
 
-            userRegisterModalVisible: false,
-            approve: this.approval[0].value, //승인여부 드롭박스 All:전체 , 0:정산됨 , 1:정산안됨
-            sale: this.sales[0].value, //판매건수 드롭박스 2:전체, max:높은순, min:낮은순
+            isSettleComplete: this.settleKind[0].value, //마감여부 드롭박스 All:전체 , 0:마감전 , 1:마감완료
 
-            date: 0,  // 0: 전체, 1:today, 2:month, 배열:기간
-            dateRange: [], //기간 범위
             searchText: '',
 
+            //페이지 관련
             currentPage: 1,      // 현재 페이지 (setCurrentPage()에서 변경됨)
             offset: 0,            //현재페이지에서 시작할 item index
-
-
         }
     }
 
-    componentDidMount() {
-
-        this.callGetSettledListAPI().then((response) => {
-            this.contents = response;
-            this.setState({ taxContents: this.contents });
-            //console.log('지점별 리스트 = ', response);
-        });
+    componentDidMount() {    
+        this.getSettledList();
     }
 
+    getSettledList=()=> {
+        this.callGetSettledListAPI().then((response)=> {
+            this.contents = response;
+            this.setState({ taxContents: this.contents });
+        });
+    }
+   
     //지점별 정산/미정산 리스트 호출 
+    //호출 url뒤에 ?how_long=5라고 하면 현재부터 5개월전까지 호출
+    //즉 현재가 8월이면 3월부터 8월
     async callGetSettledListAPI() {
         let manager = new WebServiceManager(Constant.serviceURL + "/admin/GetSettledList");
         let response = await manager.start();
@@ -68,19 +66,17 @@ export default class TaxManager extends Component {
 
     }
 
-    async callGetSettledExcelAPI() {
-        let manager = new WebServiceManager(Constant.serviceURL + "/admin/GetSettledExcel");
-        let response = await manager.start();
-        if (response.ok)
-            return response.blob();
-    }
 
     //프로젝트 리스트에서 하나의 아이템을 선택하면 DetailPopup창을 띄우고 현재 선택된 아이템의 index 설정
-    setItemIndex = (item) => {
+    onItemClickListener = (item) => {
         this.setState({
             modalVisible: !this.state.modalVisible,
             item: item
         });
+    }
+
+    closeModalListener=()=> {
+        this.setState({modalVisible:false});
     }
 
 
@@ -91,105 +87,68 @@ export default class TaxManager extends Component {
     };
 
 
-    //기간설정리스너
-    onDateListener = (date) => {
-        console.log('date', date)
-        this.setState({ date: date })
-        this.setState({ taxContents: this.dataFiltering(date, this.state.searchText, this.state.approve, this.state.sale) })
-    }
-    onDateRangeListener = (dates) => {
-        this.setState({ date: dates })
-        this.setState({ taxContents: this.dataFiltering(dates, this.state.searchText, this.state.approve, this.state.sale) });
-    }
-    //검색리스너
+    //가맹점명으로 검색
     searchTextListener = (text) => {
         this.setState({ searchText: text })
-        this.setState({ taxContents: this.dataFiltering(this.state.date, text, this.state.approve, this.state.sale) })
+        this.setState({ taxContents: this.dataFiltering(text, this.state.isSettleComplete) })
     }
 
     //정산여부리스너
-    selectApproveListener = (value) => {
-        console.log(this.approval)
-        this.setState({ approve: value })
-        this.setState({ taxContents: this.dataFiltering(this.state.date, this.state.searchText, value, this.state.sale) })
+    selectSettleKindListener = (value) => {
+        //console.log(this.approval)
+        this.setState({ isSettleComplete: value })
+        this.setState({ taxContents: this.dataFiltering(this.state.searchText, value) })
     }
 
-    //기간설정에 따른 데이터필터링
-    dataFiltering(date, text, approve, sale) {
-        console.log('date: ', date)
-        console.log('text: ', text)
-        console.log('approve: ', approve)
-        console.log('sale: ', sale)
+    //조건에 따른 데이터필터링
+    dataFiltering(text, settleKind) {       
         let filteredContents = this.contents;
 
+        //가맹점명으로 검색
         filteredContents = filteredContents.filter((item) => {
-            if (date === 1)
-                return Constant.isSameMonth(new Date(item.registerDate))
-            else if (date === 2)
-                return Constant.isThreeMonth(new Date(item.registerDate))
-            else if (date === 3)
-                return Constant.isSixMonth(new Date(item.registerDate))
-            else if (date.length === 2)
-                return new Date(item.registerDate) >= date[0] && new Date(item.registerDate) <= date[1]
-            else
-                return true
-
-        })
-
-        filteredContents = filteredContents.filter((item) => {
-            console.log('keyword: ', text)
+            //console.log('keyword: ', text)
             if (item.cmpName.includes(text))
-                return true
+                return true;
         });
 
+        //정산 또는 미정산 선택시 필터링
         filteredContents = filteredContents.filter((item) => {
-            if (approve === this.approval[0].value)
+            if (settleKind === this.settleKind[0].value)
                 return true;
             else
-                return item.complete === approve
-        })
+                return item.complete === settleKind;
+        });
 
-        filteredContents = filteredContents.filter((item) => {
-            if (sale === this.sales[0].value)
-                return true;
-            else
-                return item.sale === sale
-        })
-
-        return filteredContents
-
+        return filteredContents;
     }
+
     render() {
-        //console.log('approval', this.state.approval)
-        //console.log('sale', this.state.sale)
         return (
-            <div style={{ height: '90vh' }}>
-                <Container>
-                    {/* 서브탑메뉴바 영역 */}
-                    <nav className="topmenubar w-100">
-                        <div className="d-flex topmenubar">
-                            <Box style={{ marginRight: '15px' }} sx={{ minWidth: 190 }} >
-                                <FormControl fullWidth>
-                                    <InputLabel>마감여부</InputLabel>
-                                    <Select
-                                        value={this.state.approve}
-                                        label="마감여부"
-                                        onChange={(e) => this.selectApproveListener(e.target.value)}
-                                    >
-                                        {this.approval.map((item, i) => <MenuItem value={item.value} key={i}>{item.title}</MenuItem>)}
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        </div>
+            <Container>
+                {/* 서브탑메뉴바 영역 */}
+                <nav className="topcontents topmenubar w-100">
+                    <div className="d-flex topmenubar">
+                        <Box style={{ marginRight: '15px' }} sx={{ minWidth: 190 }} >
+                            <FormControl fullWidth>
+                                <InputLabel>마감여부</InputLabel>
+                                <Select
+                                    value={this.state.isSettleComplete}
+                                    label="마감여부"
+                                    onChange={(e) => this.selectSettleKindListener(e.target.value)}>
+                                    {this.settleKind.map((item, i) => <MenuItem value={item.value} key={i}>{item.title}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+                        </Box>
+                    </div>
 
-                        <PageHeader onDateRangeListener={this.onDateRangeListener} onDateListener={this.onDateListener} searchTextListener={(text) => this.searchTextListener(text)} />
-                    </nav>
+                    <PageHeader searchTextListener={(text) => this.searchTextListener(text)} />
+                </nav>
 
-                    {
-                        this.state.modalVisible && <ModalTaxDetail item={this.state.item} hideButtonClicked={this.setItemIndex} />
-                    }
-                    {/* 테이블 영역 */}
-                    <Table hover style={{ marginBottom: 5 }}>
+                {this.state.modalVisible && <ModalTaxDetail item={this.state.item} closeButtonListener={this.closeModalListener} onRefresh={this.getSettledList}/>}
+
+                {/* 테이블 영역 */}
+                <div className="middlecontents">
+                    <Table hover>
                         <thead>
                             <tr>
                                 <th>년-월</th>
@@ -197,34 +156,30 @@ export default class TaxManager extends Component {
                                 <th>주소</th>
                                 <th>전화번호</th>
                                 <th>마감여부</th>
+                                <th>다운로드</th>
                             </tr>
                         </thead>
-                        {/* 튜플영역을 map을 사용하여 하나씩 받아와 뿌려주도록 구성함 */}
-                        {
-                            this.contents.length === 0 ? <tbody><tr><td colSpan={5}>비었습니다.</td></tr></tbody> : <>
-                              
-                                {/* 튜플영역을 map을 사용하여 하나씩 받아와 뿌려주도록 구성함 */}
-                                <tbody>
+                        <tbody>
+                            {/* 튜플영역을 map을 사용하여 하나씩 받아와 뿌려주도록 구성함 */}
+                            {
+                                this.state.taxContents.length === 0 ? <tr><td colSpan={6}>비었습니다.</td></tr> : <>
+
+                                    {/* 튜플영역을 map을 사용하여 하나씩 받아와 뿌려주도록 구성함 */}
                                     {
                                         this.state.taxContents.slice(this.state.offset, this.state.offset + this.itemCountPerPage).map((item, i) =>
-                                            <ListItem item={item} key={i} excelDownListener={(item) => this.getExcel(item)} listener={(item) => this.setItemIndex(item)} />)
+                                            <ListItem item={item} key={i} onClicklistener={(item) => this.onItemClickListener(item)} />)
                                     }
-                                </tbody>
 
-                            </>
-                        }
-
+                                </>
+                            }
+                        </tbody>
                     </Table>
-                    <div className="w-100 p-2" style={{ textAlign: 'center' }}>
-                        {this.state.taxContents.length > 0 && (
-                            <Pagenation2 itemCount={this.state.taxContents.length} pageCountPerPage={this.pageCountPerPage} itemCountPerPage={this.itemCountPerPage} currentPage={this.state.currentPage} clickListener={this.setCurrentPage} />
-                        )}</div>
-                </Container>
-
-            </div>
-
-
-
+                </div>
+                <div className="bottomcontents m-2">
+                    {this.state.taxContents.length > 0 && (
+                        <Pagenation2 itemCount={this.state.taxContents.length} pageCountPerPage={this.pageCountPerPage} itemCountPerPage={this.itemCountPerPage} currentPage={this.state.currentPage} clickListener={this.setCurrentPage} />
+                    )}</div>
+            </Container>
         );
     }
 }
@@ -235,39 +190,49 @@ export default class TaxManager extends Component {
 class ListItem extends Component {
     constructor(props) {
         super(props);
-
     }
 
-    onClicked = () => {
-        if (this.props.item.complete == 1) {
-            const element = document.createElement('a');
-            const url = Constant.serviceURL + "/admin/GetSettledExcel?user_id=" + this.props.item.userID + "&day=" + this.props.item.belongDate;
-            console.log('excel down url = ', url);
-            element.href = url;
-            document.body.appendChild(element);
-            element.click();
+    //리스트에서 다운로드 아이콘 클릭시
+    onDownloadClicked = (e) => {
+        e.stopPropagation(); //이거 없애면 상위모달도 같이 클릭됨
+        if (window.confirm("다운로드하시겠습니까?")) {
+            if (this.props.item.complete == 1) {
+                const element = document.createElement('a');
+                const url = Constant.serviceURL + "/admin/GetSettledExcel?user_id=" + this.props.item.userID + "&day=" + this.props.item.belongDate;
+                console.log('excel down url = ', url);
+                element.href = url;
+                document.body.appendChild(element);
+                element.click();
+            }
         }
+
     }
 
-    // onClickListener = () => {
-    //     if(this.props.item.complete==1)
-    //         this.props.excelDownListener(this.props.item);
-    //         //this.props.listener(this.props.item);
-    // }
+    //리스트를 선태했을 경우
+    onClickListener = () => {
+        this.props.onClicklistener(this.props.item);
+    }
 
     render() {
         const item = this.props.item;
         return (
-            <tr onClick={this.onClicked}>
+            <tr onClick={this.onClickListener}>
                 <td>{item.belongDate}</td>
                 <td>{item.cmpName}</td>
                 <td>{item.cmpAddress}</td>
                 <td>{item.cmpTel}</td>
                 {/* 0:미정산, 1:정산 */}
-                {item.complete === 1
-                    ? (<td>O</td>)
-                    : (<td>X</td>)
+                {item.complete >0
+                    ? (<>
+                        <td>O</td>
+                        <td><DownloadIcon className="downloadButton" onClick={(e) => this.onDownloadClicked(e)} /></td>
+                    </>)
+                    : (<>
+                        <td>X</td>
+                        <td> </td>
+                    </>)
                 }
+
             </tr>
         )
 

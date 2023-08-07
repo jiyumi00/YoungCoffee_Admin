@@ -55,9 +55,11 @@ a {
 }
 
 .main {
+  margin-top: 50px;
   margin-left: 180px;
-  margin-top: 60px;
-  overflow-x: hidden
+  margin-bottom:0px;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 @media screen and (max-width : 998px) {
@@ -74,6 +76,7 @@ a {
   .main {
     margin-left: 0px;
     margin-top: 105px;
+   
   }
 
 }
@@ -84,7 +87,7 @@ a {
     font-size: 12px;
   }
   .main {
-    margin-top: 90px;
+    margin-top: 88px;
   }
   .menu-bar {
     top: 40px;

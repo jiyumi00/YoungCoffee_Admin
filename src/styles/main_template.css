@@ -20,11 +20,15 @@ thead {
     font-weight: bold;
 }
 
+
+
 th {
     width: 12rem;
+    text-align: center;
 }
 
 td {
+
     vertical-align: middle;
     text-align: center;
 }
@@ -93,7 +97,11 @@ a.fc-col-header-cell-cushion {
     border-bottom-left-radius: 0;
 }
 
-
+.rightBorder{
+   border-right-width: 1px;
+   border-right-color: grey;
+   width:45%
+}
 
 .modal {
     display: block;
@@ -102,7 +110,8 @@ a.fc-col-header-cell-cushion {
     background: rgba(0, 0, 0, 0.5);
 }
 
-.closeButton:hover {
+.closeButton:hover,
+.downloadButton:hover {
     cursor: pointer;
 }
 
@@ -119,7 +128,7 @@ a.fc-col-header-cell-cushion {
 }
 
 .search {
-    width: 30%;
+    width: 40%;
 }
 
 .topmenubar {
@@ -151,7 +160,16 @@ a.fc-col-header-cell-cushion {
     color: red;
     font-size: 13px;
 }
+.topcontents{
 
+}
+.middlecontents{
+   height:750px;
+}
+.bottomcontents{
+    height:40px;
+    text-align: center;
+}
 @media screen and (max-width : 998px) {
     .search {
         width: 100%;
@@ -164,6 +182,7 @@ a.fc-col-header-cell-cushion {
     .inputnavbar {
         margin: 15px 15px 0px 0px;
     }
+    
 
 }
 

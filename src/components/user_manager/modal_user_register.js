@@ -10,9 +10,10 @@ import NameCardImage from "../../images/nameCard.png";
 //data={"cmpNo":"0000000002","cmpName":"우리커피","cmpAddress":"김해시 어방동","cmpTel":"01099998888","repName":"박우리"}
 
 //회원정보 등록 모달 클래스
-export default class ModalUserRegister extends Component {
+export default class UserRegisterModal extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             cmpNo: '', //사업자등록 번호
             cmpName: '', //회사상호명
@@ -22,7 +23,6 @@ export default class ModalUserRegister extends Component {
 
             registerButtonVisible: false, //회원등록 버튼 활성화 체크변수
         }
-
     }
 
     //회원등록 활성화 함수
@@ -30,13 +30,13 @@ export default class ModalUserRegister extends Component {
         this.setState(value, () => {
             let isValidForm = true;
 
-            if (this.state.cmpNo.trim().replaceAll("-", "").length < 10) // 조건 필요시 추가
+            if (this.state.cmpNo.trim().replaceAll("-", "").length < 10 ||this.state.cmpNo.trim().replaceAll("-", "").length > 10) // 조건 필요시 추가
                 isValidForm = false;
             if (this.state.cmpAddress.trim().length === 0)
                 isValidForm = false;
             if (this.state.cmpName.trim().length === 0)
                 isValidForm = false;
-            if (this.state.cmpTel.trim().length === 0)
+            if (this.state.cmpTel.trim().replaceAll("-", "").length < 11 ||this.state.cmpTel.trim().replaceAll("-", "").length > 11)
                 isValidForm = false;
             if (this.state.repName.trim().length === 0)
                 isValidForm = false;
@@ -49,18 +49,14 @@ export default class ModalUserRegister extends Component {
 
     goAddUser = () => {
         this.callAddUserAPI().then((response) => {
-            //console.log('adduser', response);
+            console.log('adduser', response);
             //console.log('response.success', response.success);
-            if (response.success === 0) {
-                alert("계정추가에 실패하였습니다.");
-            }            
-            else {
-                alert('가맹점이 등록되었습니다.');
-                this.props.hideButtonClicked();
+            alert(response.message);
+            if (response.success > 0) {                
+                this.props.closeButtonListener();
                 this.props.onRefresh();
-
-            }
-        })
+            }            
+        });
 
     }
 
@@ -79,7 +75,7 @@ export default class ModalUserRegister extends Component {
         manager.addFormData("login", login); //addUser할 권한이 있는지 확인
         manager.addFormData("data", userData); //넣을 데이터
 
-        //console.log(userData);
+        console.log(userData);
         let response = await manager.start();
         if (response.ok)
             return response.json();
@@ -90,11 +86,11 @@ export default class ModalUserRegister extends Component {
         return (
             <div className="modal w-100" >
                 <Modal.Dialog
-                    size="md"
+                    size="lg"
                     centered>
                     <Modal.Header>
                         <Modal.Title>회원등록</Modal.Title>
-                        <CloseButton onClick={this.props.hideButtonClicked} />
+                        <CloseButton onClick={this.props.closeButtonListener} />
                     </Modal.Header>
                     {/* 이미지 프리뷰 할지 고민중 */}
                     <Modal.Body>
@@ -111,13 +107,13 @@ export default class ModalUserRegister extends Component {
                                 <div className="background">
                                     <label>사업자번호</label>
                                     <Form.Control
-                                        type='text' value={Constant.transformCmpNo(this.state.cmpNo)} onChange={(e) => { this.onValueChange({ cmpNo: e.target.value }) }}
+                                        type='text' placeholder="사업자등록번호 10자리 -없이 입력해주세요." value={Constant.transformCmpNo(this.state.cmpNo)} onChange={(e) => { this.onValueChange({ cmpNo: e.target.value }) }}
                                     />
                                 </div>
                                 <div className="background">
                                     <label>전화번호</label>
                                     <Form.Control
-                                        type='text' value={this.state.cmpTel} onChange={(e) => { this.onValueChange({ cmpTel: e.target.value }) }}
+                                        type='text' placeholder="전화번호 -없이 입력해주세요." value={Constant.transformPhoneNumber(this.state.cmpTel)} onChange={(e) => { this.onValueChange({ cmpTel: e.target.value }) }}
                                     />
                                 </div>
                                 <div className="background">

@@ -17,10 +17,11 @@ export default class LoginPage extends Component {
             loginID: '',
             passwd: '',
             loginSuccess: false,
-        }
+        };
+        MyStorage.dispatch({type:"Visit"});
     }
     componentDidMount() {
-        MyStorage.dispatch({type:"Logout"});
+        //MyStorage.dispatch({type:"Logout"});
     }
 
     loginButtonClicked = (e) => {
@@ -82,13 +83,13 @@ export default class LoginPage extends Component {
                             type='password' value={this.state.passwd} onChange={(e) => this.setState({passwd:e.target.value})}
                         />
                     </div>
-                    <Link to="/UserInfo">
-                        <div className="background" >
-                            <button className="loginbutton w-100 sideColor" onClick={this.loginButtonClicked}>Login</button>
-                        </div>
-                    
+                        <Link to="/UserInfo">
+                            <div className="background" >
+                                <button className="loginbutton w-100 sideColor" onClick={this.loginButtonClicked}>Login</button>
+                            </div>
                         </Link>
-                    {this.state.loginSuccess && (<Link to='/UserInfo' />)}
+                       
+                    
                 </form>
             </div>
         )

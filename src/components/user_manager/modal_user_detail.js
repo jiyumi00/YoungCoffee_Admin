@@ -1,52 +1,43 @@
 import React, { Component } from "react";
-import { Button, Modal, CloseButton } from "react-bootstrap";
+import { Button, Modal, CloseButton,Table,  } from "react-bootstrap";
 
 import WebServiceManager from "../../util/webservice_manager";
 import Constant from "../../util/constant_variables";
 
 
 //UserInfo 상세보기 모달 클래스
-export default class ModalUserDetail extends Component {
+export default class UserDetailModal extends Component {
     constructor(props) {
         super(props);
-        this.id = this.props.item.id
+        
         this.state = {
-            companyNoImageURI: '', //companyNoImageURI:사업자등록증 사진
-            cardImageURI: '' //cardImageURI:명함 사진
+          //validate : this.props.item.validate,
         }
     }
-    approveButtonClicked = () => {
-        alert('알림문자를 보냈습니다.')
+
+    setInitializePasswd=()=> {
+        if(window.confirm("가맹점 등록시 사용한 전화번호로 비밀번호를 초기화힙니다.\n 진행하시겠습니까?")) {
+            this.callSetInitializePasswdAPI().then((response)=> {
+                if(response.success>0)
+                    alert(this.props.item.cmpName+"의 비밀번호가 초기화 되었습니다.");
+                else
+                    alert(this.props.item.cmpName+"의 비밀번호가 초기화에 실패했습니다.");
+            });
+        }
     }
 
-    componentDidMount() {
-        this.callGetCompanyImageAPI().then((response) => {
-            this.setState({ companyNoImageURI: URL.createObjectURL(response) })
-        })
-        this.callGetcardImageAPI().then((response) => {
-            this.setState({ cardImageURI: URL.createObjectURL(response) })
-        })
-    }
 
+    async callSetInitializePasswdAPI() {
+        const login = { "userID": parseInt(sessionStorage.getItem("userID")), "passwd":sessionStorage.getItem("passwd") }
+        const data = {userID: this.props.item.userID};
 
-    //사업자등록증 사진을 가져오는 API
-    async callGetCompanyImageAPI() {
-        let manager = new WebServiceManager(Constant.serviceURL + "/GetCompanyImage", "post");
-        manager.addFormData("data", { userID: 28, passwd: "9999", id: this.id });//열람하고자 하는 id
+        let manager = new WebServiceManager(Constant.serviceURL + "/admin/SetInitializePasswd", "post");
+        manager.addFormData("login", login); //마감취소할 권한이 있는지 확인
+        manager.addFormData("data", data); //넣을 데이터
+
         let response = await manager.start();
-        if (response.ok) {
-            return response.blob();
-        }
-    }
-
-    //명함 사진을 가져오는 API
-    async callGetcardImageAPI() {
-        let manager = new WebServiceManager(Constant.serviceURL + "/GetNamecardImage", "post");
-        manager.addFormData("data", { userID: 28, passwd: "9999", id: this.id });//열람하고자 하는 id
-        let response = await manager.start();
-        if (response.ok) {
-            return response.blob();
-        }
+        if (response.ok)
+            return response.json();
     }
 
     render() {
@@ -55,60 +46,58 @@ export default class ModalUserDetail extends Component {
             <div className="modal w-100 h-100" >
 
                 <Modal.Dialog
-                    size="xl"
+                    size="lg"
                     centered>
                     <Modal.Header>
                         <Modal.Title>상세보기</Modal.Title>
-                        <CloseButton onClick={this.props.hideButtonClicked} />
+                        <CloseButton onClick={this.props.closeButtonListener} />
                     </Modal.Header>
 
                     <Modal.Body>
-                        <div className="fleft" style={{ width: '70%' }}>
-                            <img
-                                className="d-block w-50 fleft" height={'450px'}
-                                src={this.state.companyNoImageURI}
-                            />
-                            <img
-                                className="d-block w-50 fleft" height={'450px'}
-                                src={this.state.cardImageURI}
-                            />
+                        <div>
+                            <Table bordered className="w-100">
+                                <tbody>
+                                    <tr>
+                                        <th>가맹점 명</th>
+                                        <td>{item.cmpName}</td>
+                                    </tr>
+                                    <tr>
+                                        <th >사업자번호</th>
+                                        <td>{Constant.transformCmpNo(item.cmpNo)}</td>
 
+                                    </tr>
+                                    <tr>
+                                        <th>전화번호</th>
+                                        <td>{Constant.transformPhoneNumber(item.cmpTel)}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>주소</th>
+                                        <td>{item.cmpAddress}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>대표자이름</th>
+                                        <td>{item.repName}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>사용여부</th>
+                                        {item.validate === 1 ? (<td>O</td>) : (<td>X</td>)}
+                                    </tr>
+
+                                </tbody>
+
+                            </Table>
                         </div>
-
-                        <div className="fleft" style={{ width: '30%'}} >
-                        <table className="w-100 background">
-                            <tbody>
-                                <tr>
-                                    <th><p>이름</p></th>
-                                    <td><p>{item.username}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>사업자번호</p></th>
-                                    <td><p>{item.companyNo}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>전화번호</p></th>
-                                    <td><p>{item.phone}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>가입일시</p></th>
-                                    <td><p>{item.registerDate}</p></td>
-                                </tr>
-                                <tr>
-                                    <th><p>주소</p></th>
-                                    <td><p>{item.address}</p></td>
-                                </tr>
-                            </tbody>
-
-                        </table>
-                        </div>
-
-                       
                     </Modal.Body>
                     <Modal.Footer>
-                        {item.validate === 1 && <Button variant="primary" onClick={() => { this.approveButtonClicked() }}>승인</Button>}
-                        <Button variant="primary" onClick={() => { this.approveButtonClicked() }}>수정</Button>
-                        <Button variant="danger" onClick={() => { this.approveButtonClicked() }}>탈퇴</Button>
+                        {<Button className="downloadButton" onClick={this.setInitializePasswd}>비밀번호 초기화</Button>}
+                        {/*
+                        {
+                            item.validate === 1 ? <Button variant="danger" onClick={() => { this.props.disabledButtonClicked() }}>비활성화</Button>
+                                : <Button variant="primary" onClick={() => { this.props.abledButtonClicked() }}>활성화</Button>
+                        }
+                    */}
+
+
                     </Modal.Footer>
                 </Modal.Dialog>
 

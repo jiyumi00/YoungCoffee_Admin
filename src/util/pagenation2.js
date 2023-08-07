@@ -11,7 +11,7 @@ class Pagenation2 extends Component {
             startPage: 1,
             endPage: this.props.pageCountPerPage
         }
-        console.log('pagenation props = ', this.props)
+        //console.log('pagenation props = ', this.props)
 
         this.maxPage = Math.ceil(this.props.itemCount / this.props.itemCountPerPage);
 
@@ -19,7 +19,7 @@ class Pagenation2 extends Component {
             this.pages.push(i);
 
        
-        console.log('pages = ', this.pages);
+        //console.log('pages = ', this.pages);
 
     }
 

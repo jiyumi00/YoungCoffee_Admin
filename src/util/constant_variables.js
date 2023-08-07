@@ -2,7 +2,9 @@ import PersonIcon from '@mui/icons-material/Person';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 
 export default class Constant{
-    static serviceURL="http://test.ycoffee.kr/ycoffee"; 
+    //static serviceURL="http://203.241.251.177/ycoffee"; 
+    //static serviceURL="http://test.ycoffee.kr/ycoffee"; 
+    static serviceURL="http://api.ycoffee.kr/ycoffee"; 
     //영커피로 바꿔야함
 
     static getSideMenus(){
@@ -23,31 +25,15 @@ export default class Constant{
         let today=new Date()
         return date.getFullYear()===today.getFullYear()
         && date.getMonth()===today.getMonth()
-        &&date.getDate()===today.getDate();
+        && date.getDate()===today.getDate();
     }
     static isSameMonth=(date)=>{
         let today=new Date()
         return date.getMonth()===today.getMonth()
     }
-    //user_manager approval dropdownbox
-    static getApproval(){
-        return [
-            {value:"All", title:"전체"},
-            {value:0, title:"승인됨"},
-            {value:1, title:"승인안됨"}
-        ];
-    }
-    //user_mannager sale dropdownbox
-    static getSales(){
-        return [
-            {value:"All", title:"전체"},
-            {value:"Max", title:"높은순"},
-            {value:"Min", title:"낮은순"}
-        ];
-    }
 
-     //user_manager approval dropdownbox
-     static getTaxApproval(){
+     //정산관리에서 사용될 검색 드롭박스
+     static getSettleKind(){
         return [
             {value:"All", title:"전체"},
             {value:1, title:"마감완료"},
@@ -70,6 +56,7 @@ export default class Constant{
         return value.replace(/^(\d{6})(\d{7})$/g, "$1-$2");
     }
 
+    //사업자등록증에 -넣기
     static transformCmpNo=(value)=> {
         return value.replace(/^(\d{3})(\d{2})(\d{5})$/g, "$1-$2-$3");
     }

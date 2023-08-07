@@ -1,22 +1,31 @@
-import React, { Component } from 'react';
-import { Navbar, Container, Nav } from 'react-bootstrap';
+import React, { Component, Navigate } from 'react';
+import { Navbar, Container, Nav, NavLink } from 'react-bootstrap';
 // import '../css/TopPage.css';
 import LongLogo from "./../images/long_logo/long_logo.png";
 
 import { Link } from 'react-router-dom';
+
+import MyStorage from '../util/redux_storage';
+
 export default class TopTemplate extends Component {
   constructor(props) {
     super(props);
+  }
+
+  logout = () => {
+    if (window.confirm("로그아웃 하시겠습니까?")) {
+      MyStorage.dispatch({type:"Logout"});
+    }
   }
 
   render() {
     return (
       <div className="top">
         <Navbar bg="light" variant="light">
-          <Navbar.Brand href='/' style={{ marginLeft: '15px'}}>
-            <img style={{width:150}} src={LongLogo}/></Navbar.Brand>
+          <Navbar.Brand href='/UserInfo' style={{ marginLeft: '15px' }}>
+            <img style={{ width: 150 }} src={LongLogo} /></Navbar.Brand>
           <Nav className="ms-auto">
-            <Link to="/" style={{ marginRight: '15px',color: '#BF0757' }}>LOGOUT</Link>
+            <NavLink style={{ marginRight: '15px', color: '#BF0757' }} onClick={this.logout} >LOGOUT</NavLink>
           </Nav>
         </Navbar>
       </div>
