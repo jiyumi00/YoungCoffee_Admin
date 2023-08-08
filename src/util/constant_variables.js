@@ -3,8 +3,8 @@ import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 
 export default class Constant{
     //static serviceURL="http://203.241.251.177/ycoffee"; 
-    //static serviceURL="http://test.ycoffee.kr/ycoffee"; 
-    static serviceURL="http://api.ycoffee.kr/ycoffee"; 
+    static serviceURL="http://test.ycoffee.kr/ycoffee"; 
+    //static serviceURL="http://api.ycoffee.kr/ycoffee"; 
     //영커피로 바꿔야함
 
     static getSideMenus(){

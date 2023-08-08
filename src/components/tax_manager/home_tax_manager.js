@@ -17,6 +17,8 @@ import ModalTaxDetail from '../tax_manager/modal_tax_detail';
 
 import Pagenation2 from "../../util/pagenation2";
 
+import { ko } from "date-fns/esm/locale";
+import DatePicker from "react-datepicker";
 export default class TaxManager extends Component {
     constructor(props) {
         super(props);
@@ -41,6 +43,7 @@ export default class TaxManager extends Component {
             //페이지 관련
             currentPage: 1,      // 현재 페이지 (setCurrentPage()에서 변경됨)
             offset: 0,            //현재페이지에서 시작할 item index
+            month:2,  // 필터링 할 개월
         }
     }
 
@@ -59,7 +62,7 @@ export default class TaxManager extends Component {
     //호출 url뒤에 ?how_long=5라고 하면 현재부터 5개월전까지 호출
     //즉 현재가 8월이면 3월부터 8월
     async callGetSettledListAPI() {
-        let manager = new WebServiceManager(Constant.serviceURL + "/admin/GetSettledList");
+        let manager = new WebServiceManager(Constant.serviceURL + "/admin/GetSettledList?how_long="+this.state.month);
         let response = await manager.start();
         if (response.ok)
             return response.json();
@@ -100,7 +103,6 @@ export default class TaxManager extends Component {
         this.setState({ taxContents: this.dataFiltering(this.state.searchText, value) })
     }
 
-    //조건에 따른 데이터필터링
     dataFiltering(text, settleKind) {       
         let filteredContents = this.contents;
 
@@ -122,6 +124,19 @@ export default class TaxManager extends Component {
         return filteredContents;
     }
 
+
+    //이번달, 3개월, 5개월 버튼 함수
+    dateButtonClicked=(value)=>{
+        this.setState({month:value},()=>{
+            this.callGetSettledListAPI().then((response)=> {
+                this.contents = response;
+                this.setState({ taxContents: this.dataFiltering(this.state.searchText, this.state.isSettleComplete) });
+            });
+          
+        })
+        
+    }
+   
     render() {
         return (
             <Container>
@@ -139,8 +154,15 @@ export default class TaxManager extends Component {
                                 </Select>
                             </FormControl>
                         </Box>
+                        <div className="btn-group" role="group" aria-label="Basic example">
+                                    <button type="button" className={this.state.month==0?"btn btn-outline-dark active":"btn btn-outline-dark"} onClick={()=>{this.dateButtonClicked(0)}}>이번달</button>
+                                    <button type="button" className={this.state.month==2?"btn btn-outline-dark active":"btn btn-outline-dark"} onClick={()=>{this.dateButtonClicked(2)}}>3개월</button>
+                                    <button type="button" className={this.state.month==4?"btn btn-outline-dark active":"btn btn-outline-dark"} onClick={()=>{this.dateButtonClicked(4)}}>5개월</button>
+                                
+                            </div>
                     </div>
-
+                  
+                    
                     <PageHeader searchTextListener={(text) => this.searchTextListener(text)} />
                 </nav>
 

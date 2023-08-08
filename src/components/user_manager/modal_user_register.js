@@ -30,13 +30,13 @@ export default class UserRegisterModal extends Component {
         this.setState(value, () => {
             let isValidForm = true;
 
-            if (this.state.cmpNo.trim().replaceAll("-", "").length < 10 ||this.state.cmpNo.trim().replaceAll("-", "").length > 10) // 조건 필요시 추가
+            if (this.state.cmpNo.trim().replaceAll("-", "").length < 10 || this.state.cmpNo.trim().replaceAll("-", "").length > 10) // 조건 필요시 추가
                 isValidForm = false;
             if (this.state.cmpAddress.trim().length === 0)
                 isValidForm = false;
             if (this.state.cmpName.trim().length === 0)
                 isValidForm = false;
-            if (this.state.cmpTel.trim().replaceAll("-", "").length < 11 ||this.state.cmpTel.trim().replaceAll("-", "").length > 11)
+            if (this.state.cmpTel.trim().replaceAll("-", "").length < 11 || this.state.cmpTel.trim().replaceAll("-", "").length > 11)
                 isValidForm = false;
             if (this.state.repName.trim().length === 0)
                 isValidForm = false;
@@ -52,17 +52,17 @@ export default class UserRegisterModal extends Component {
             console.log('adduser', response);
             //console.log('response.success', response.success);
             alert(response.message);
-            if (response.success > 0) {                
+            if (response.success > 0) {
                 this.props.closeButtonListener();
                 this.props.onRefresh();
-            }            
+            }
         });
 
     }
 
     //modal user register
     async callAddUserAPI() {
-        const login = { "userID": parseInt(sessionStorage.getItem("userID")), "passwd":sessionStorage.getItem("passwd") }
+        const login = { "userID": parseInt(sessionStorage.getItem("userID")), "passwd": sessionStorage.getItem("passwd") }
         const userData = {
             cmpNo: this.state.cmpNo.replace(/-/g, ''),
             cmpName: this.state.cmpName,
@@ -115,6 +115,9 @@ export default class UserRegisterModal extends Component {
                                     <Form.Control
                                         type='text' placeholder="전화번호 -없이 입력해주세요." value={Constant.transformPhoneNumber(this.state.cmpTel)} onChange={(e) => { this.onValueChange({ cmpTel: e.target.value }) }}
                                     />
+                                    <div className="errorMessage">
+                                        <p>＊전화번호는 초기 비밀번호로 사용됩니다.</p>
+                                    </div>
                                 </div>
                                 <div className="background">
                                     <label>주소</label>
